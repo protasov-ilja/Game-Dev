@@ -20,20 +20,198 @@ public class GameController : MonoBehaviour
     public Text oPlayerScoreText;
     public Button xPlayerButton;
     public Button oPlayerButton;
-    public AudioSource buttonClickAudio;
-    public AudioSource gridClickAudio;
+    //public Button BackButton;
     public AudioSource winAudio;
     public AudioSource drawAudio;
+    public GameObject GameMode;
+    public GameObject MenuObjects;
+    int prevTurn;
+    int currCount;
+    short currMode;
+    bool isWinner;
+    bool isDraw;
 
-    // Use this for initialization
-    void Start () {
-        GameSetup();
-    }
-	
-    void GameSetup()
+    int computerTurn;
+    int playerTurn;
+    const short AI_VS_AI = 2;
+    const short PLAYER_VS_AI = 1;
+    const short PLAYER_VS_PLAYER = 0;
+    bool isGameStarts;
+
+    void Awake()
     {
-        whoseTurn = 0;
+        isGameStarts = false;
+    }
+
+    public void choosePvPMode()
+    {
+        currMode = PLAYER_VS_PLAYER;
+        GameMode.SetActive(false);
+        MenuObjects.SetActive(false);
+        Restart();
+    }
+
+    public void choosePvAIMode()
+    {
+        currMode = PLAYER_VS_AI;
+        GameMode.SetActive(false);
+        MenuObjects.SetActive(false);
+        Restart();
+    }
+
+    public void chooseAIvAIMode()
+    {
+        currMode = AI_VS_AI;
+        GameMode.SetActive(false);
+        MenuObjects.SetActive(false);
+        Restart();
+    }
+
+    int choseAITurn()
+    {
+        int enemyIcon = playerTurn + 1;
+        int thisIcon = computerTurn + 1;
+        int thisTurn = 0;
+        if ((turnCount == 0) || (turnCount == 1))
+        {
+           if (markedSpaces[4] == -100)
+           {
+                thisTurn = 4;
+           }
+           else if ((markedSpaces[0] == -100) || (markedSpaces[2] == -100) || (markedSpaces[6] == -100) || (markedSpaces[8] == -100))
+           {
+                if (markedSpaces[0] == -100)
+                {
+                    thisTurn = 0;
+                }
+                else if (markedSpaces[2] == -100)
+                {
+                    thisTurn = 2;
+                }
+                else if (markedSpaces[6] == -100)
+                {
+                    thisTurn = 6;
+                }
+                else
+                {
+                    thisTurn = 8;
+                }
+           }
+           else
+           {
+                int j = 0;
+                while (markedSpaces[j] != -100)
+                {
+                    ++j;
+                }
+
+                thisTurn = j;
+           }
+        }
+        else
+        {
+            if ((((markedSpaces[8] == thisIcon) && (markedSpaces[5] == thisIcon)) || 
+                 ((markedSpaces[0] == thisIcon) && (markedSpaces[1] == thisIcon)) ||
+                 ((markedSpaces[6] == thisIcon) && (markedSpaces[4] == thisIcon)) ||
+                 ((markedSpaces[8] == enemyIcon) && (markedSpaces[5] == enemyIcon)) || 
+                 ((markedSpaces[0] == enemyIcon) && (markedSpaces[1] == enemyIcon)) ||
+                 ((markedSpaces[6] == enemyIcon) && (markedSpaces[4] == enemyIcon))) && (markedSpaces[2] == -100))
+            {
+                thisTurn = 2;
+            }
+            else if ((((markedSpaces[2] == thisIcon) && (markedSpaces[4] == thisIcon)) || 
+                      ((markedSpaces[8] == thisIcon) && (markedSpaces[7] == thisIcon)) ||
+                      ((markedSpaces[0] == thisIcon) && (markedSpaces[3] == thisIcon)) ||
+                      ((markedSpaces[8] == enemyIcon) && (markedSpaces[7] == enemyIcon)) || 
+                      ((markedSpaces[0] == enemyIcon) && (markedSpaces[3] == enemyIcon)) ||
+                      ((markedSpaces[2] == enemyIcon) && (markedSpaces[4] == enemyIcon))) && (markedSpaces[6] == -100))
+            {
+                thisTurn = 6;
+            }
+            else if ((((markedSpaces[2] == thisIcon) && (markedSpaces[5] == thisIcon)) || 
+                      ((markedSpaces[6] == thisIcon) && (markedSpaces[7] == thisIcon)) ||
+                      ((markedSpaces[0] == thisIcon) && (markedSpaces[4] == thisIcon)) ||
+                      ((markedSpaces[6] == enemyIcon) && (markedSpaces[7] == enemyIcon)) ||
+                      ((markedSpaces[0] == enemyIcon) && (markedSpaces[4] == enemyIcon)) ||
+                      ((markedSpaces[2] == enemyIcon) && (markedSpaces[5] == enemyIcon))) && (markedSpaces[8] == -100))
+            {
+                thisTurn = 8;
+            }
+            else if ((((markedSpaces[6] == thisIcon) && (markedSpaces[3] == thisIcon)) || 
+                      ((markedSpaces[8] == thisIcon) && (markedSpaces[4] == thisIcon)) ||
+                      ((markedSpaces[2] == thisIcon) && (markedSpaces[1] == thisIcon)) ||
+                      ((markedSpaces[8] == enemyIcon) && (markedSpaces[4] == enemyIcon)) ||
+                      ((markedSpaces[2] == enemyIcon) && (markedSpaces[1] == enemyIcon)) ||
+                      ((markedSpaces[6] == enemyIcon) && (markedSpaces[3] == enemyIcon))) && (markedSpaces[0] == -100))
+            {
+                thisTurn = 0;
+            }
+            else if ((((markedSpaces[1] == thisIcon) && (markedSpaces[4] == thisIcon)) ||
+                      ((markedSpaces[1] == enemyIcon) && (markedSpaces[4] == enemyIcon))) && (markedSpaces[7] == -100))
+            {
+                thisTurn = 7;
+            }
+            else if ((((markedSpaces[7] == thisIcon) && (markedSpaces[4] == thisIcon)) ||
+                      ((markedSpaces[7] == enemyIcon) && (markedSpaces[4] == enemyIcon))) && (markedSpaces[1] == -100))
+            {
+                thisTurn = 1;
+            }
+            else if ((((markedSpaces[5] == thisIcon) && (markedSpaces[4] == thisIcon)) ||
+                      ((markedSpaces[5] == enemyIcon) && (markedSpaces[4] == enemyIcon))) && (markedSpaces[3] == -100))
+            {
+                thisTurn = 3;
+            }
+            else if ((((markedSpaces[3] == thisIcon) && (markedSpaces[4] == thisIcon)) || 
+                      ((markedSpaces[3] == enemyIcon) && (markedSpaces[4] == enemyIcon))) && (markedSpaces[5] == -100))
+            {
+                thisTurn = 5;
+            }
+            else
+            {
+                int j = 0;
+                while (markedSpaces[j] != -100)
+                {
+                    ++j;
+                }
+
+                thisTurn = j;
+            }
+        }
+
+        return thisTurn;
+    }
+
+    void Update()
+    {
+        if ((currMode != 0) && (isGameStarts) && (!isWinner) && (!isDraw))
+        {
+            if (whoseTurn == computerTurn)
+            {
+                int whichCell = choseAITurn();
+                TicTacToeButton(whichCell);
+            }
+        }
+    }
+
+    void GameSetup(short currMode)
+    {
+        if (currMode == PLAYER_VS_AI)
+        {
+            playerTurn = 0;
+            computerTurn = 1;
+        } 
+        else if (currMode == PLAYER_VS_AI)
+        {
+            computerTurn = 0;
+            computerTurn = 1;
+        }
+        isDraw = false;
+        isGameStarts = true;
+        isWinner = false;
+
+        whoseTurn = playerTurn; // 0
         turnCount = 0;
+        currCount = 0;
         turnIcons[0].SetActive(true);
         turnIcons[1].SetActive(false);
         for (int i = 0; i < ticktactoeSpaces.Length; ++i)
@@ -47,93 +225,30 @@ public class GameController : MonoBehaviour
             markedSpaces[i] = -100;
         }
     }
-
-	// Update is called once per frame
-	void Update () {
-		
-	}
-
-    public void TicTacToeButton(int whichNumber)
+    
+    public void ReturnInTurn()
     {
-        xPlayerButton.interactable = false;
-        oPlayerButton.interactable = false;
-        ticktactoeSpaces[whichNumber].image.sprite = playerIcons[whoseTurn];
-        ticktactoeSpaces[whichNumber].interactable = false;
-
-        markedSpaces[whichNumber] = whoseTurn+1;
-        turnCount++;
-        if (turnCount > 4)
+        if ((turnCount != 0) && (turnCount != currCount) && !isWinner && !isDraw)
         {
-            bool isWinner = WinnerCheck();
-            if (turnCount == 9 && !isWinner)
+            ticktactoeSpaces[prevTurn].interactable = true;
+            ticktactoeSpaces[prevTurn].GetComponent<Image>().sprite = null;
+            markedSpaces[prevTurn] = -100;
+            turnCount--;
+            currCount = turnCount;
+            if (whoseTurn == 0)
             {
-                Draw();
+                SwitchTurn(1, 0);
             }
-        }
-
-        if (whoseTurn == 0)
-        {
-            whoseTurn = 1;
-            turnIcons[0].SetActive(false);
-            turnIcons[1].SetActive(true);
-        }
-        else
-        {
-            whoseTurn = 0;
-            turnIcons[1].SetActive(false);
-            turnIcons[0].SetActive(true);
-        }
-    }
-
-    bool WinnerCheck ()
-    {
-        int s1 = markedSpaces[0] + markedSpaces[1] + markedSpaces[2];
-        int s2 = markedSpaces[3] + markedSpaces[4] + markedSpaces[5];
-        int s3 = markedSpaces[6] + markedSpaces[7] + markedSpaces[8];
-        int s4 = markedSpaces[0] + markedSpaces[3] + markedSpaces[6];
-        int s5 = markedSpaces[1] + markedSpaces[4] + markedSpaces[7];
-        int s6 = markedSpaces[2] + markedSpaces[5] + markedSpaces[8];
-        int s7 = markedSpaces[0] + markedSpaces[4] + markedSpaces[8];
-        int s8 = markedSpaces[2] + markedSpaces[4] + markedSpaces[6];
-
-        var solutions = new int[] { s1, s2, s3, s4, s5, s6, s7, s8 };
-        for (int i = 0; i < solutions.Length; ++i)
-        {
-            if (solutions[i] == 3*(whoseTurn+1))
+            else
             {
-                winAudio.Play();
-                WinnerDisplay(i);
-                Debug.Log("player " + whoseTurn + " won!");
-                return true;
+                SwitchTurn(0, 1);
             }
-        }
-
-        return false;
+        } 
     }
-
-    void WinnerDisplay(int indexIn)
-    {
-        winnerPanel.gameObject.SetActive(true);
-
-        if (whoseTurn == 0)
-        {
-            xPlayerScore++;
-            xPlayerScoreText.text = xPlayerScore.ToString();
-            winnerText.text = "Player X Wins!";
-        }
-        else if (whoseTurn == 1)
-        {
-            oPlayerScore++;
-            oPlayerScoreText.text = oPlayerScore.ToString();
-            winnerText.text = "Player O Wins!";
-        }
-
-        winningLine[indexIn].SetActive(true);
-    }
-
+    
     public void Rematch()
     {
-        GameSetup();
+        GameSetup(currMode);
 
         for (int i = 0; i < winningLine.Length; ++i)
         {
@@ -154,36 +269,114 @@ public class GameController : MonoBehaviour
         oPlayerScoreText.text = "0";
     }
 
-    public void SwitchPlayer(int whitchPlayer)
+    // 
+    public void TicTacToeButton(int whichNumber)
     {
-        if (whitchPlayer == 0)
+        xPlayerButton.interactable = false;
+        oPlayerButton.interactable = false;
+        ticktactoeSpaces[whichNumber].image.sprite = playerIcons[whoseTurn];
+        ticktactoeSpaces[whichNumber].interactable = false;
+
+        markedSpaces[whichNumber] = whoseTurn + 1;
+        prevTurn = whichNumber;
+        turnCount++;
+        if (turnCount > 4)
         {
-            whoseTurn = 0;
-            turnIcons[0].SetActive(true);
-            turnIcons[1].SetActive(false);
+            isWinner = WinnerCheck();
+            if (turnCount == 9 && !isWinner)
+            {
+                isDraw = Draw();
+            }
         }
-        else if (whitchPlayer == 1)
+
+        if (whoseTurn == 0)
         {
-            whoseTurn = 1;
-            turnIcons[0].SetActive(false);
-            turnIcons[1].SetActive(true);
+            SwitchTurn(1, 0);
+        }
+        else
+        {
+            SwitchTurn(0, 1);
         }
     }
 
-    void Draw()
+    // Проверка на победителя
+    bool WinnerCheck()
+    {
+        var solutions = new int[] {
+            markedSpaces[0] + markedSpaces[1] + markedSpaces[2],
+            markedSpaces[3] + markedSpaces[4] + markedSpaces[5],
+            markedSpaces[6] + markedSpaces[7] + markedSpaces[8],
+            markedSpaces[0] + markedSpaces[3] + markedSpaces[6],
+            markedSpaces[1] + markedSpaces[4] + markedSpaces[7],
+            markedSpaces[2] + markedSpaces[5] + markedSpaces[8],
+            markedSpaces[0] + markedSpaces[4] + markedSpaces[8],
+            markedSpaces[2] + markedSpaces[4] + markedSpaces[6]
+        };
+
+        for (int i = 0; i < solutions.Length; ++i)
+        {
+            if (solutions[i] == 3*(whoseTurn + 1))
+            {
+                winAudio.Play();
+                WinnerDisplay(i);
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // Отображает победителя и отрисовывает линию победы
+    void WinnerDisplay(int indexIn)
+    {
+        isGameStarts = false;
+        winnerPanel.gameObject.SetActive(true);
+        if (whoseTurn == 0)
+        {
+            xPlayerScore++;
+            xPlayerScoreText.text = xPlayerScore.ToString();
+            winnerText.text = "Player X Wins!";
+        }
+        else if (whoseTurn == 1)
+        {
+            oPlayerScore++;
+            oPlayerScoreText.text = oPlayerScore.ToString();
+            winnerText.text = "Player O Wins!";
+        }
+
+        winningLine[indexIn].SetActive(true);
+    }
+
+    public void SwitchPlayer(int whitchPlayer)
+    {
+        int otherPlayer = 0;
+        if (whitchPlayer == 0)
+        { 
+            otherPlayer = 1;
+            computerTurn = otherPlayer;
+        } 
+        else
+        {
+            computerTurn = otherPlayer;
+        }
+
+        SwitchTurn(whitchPlayer, otherPlayer);
+    }
+
+    void SwitchTurn(int whitchPlayer, int otherPlayer)
+    {
+        whoseTurn = whitchPlayer;
+        turnIcons[whitchPlayer].SetActive(true);
+        turnIcons[otherPlayer].SetActive(false);
+    }
+    
+    // активирует панель и выводит надпись Ничья с пригрышем музыки
+    bool Draw()
     {
         drawAudio.Play();
         winnerPanel.SetActive(true);
         winnerText.text = "DRAW!";
-    }
-
-    public void PlayButtonClick()
-    {
-        buttonClickAudio.Play();
-    }
-
-    public void PlayGridClick()
-    {
-        gridClickAudio.Play();
+        return true;
     }
 }
