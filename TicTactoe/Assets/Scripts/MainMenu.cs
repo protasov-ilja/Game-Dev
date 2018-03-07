@@ -17,6 +17,11 @@ public class MainMenu : MonoBehaviour
 
     public void OpenMainMenu()
     {
+        if (GameMode == true)
+        {
+            GameMode.SetActive(false);
+        }
+
         MenuObjects.SetActive(true);
         GameMenu.SetActive(true);
     }

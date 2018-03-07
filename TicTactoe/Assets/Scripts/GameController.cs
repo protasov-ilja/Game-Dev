@@ -20,7 +20,6 @@ public class GameController : MonoBehaviour
     public Text oPlayerScoreText;
     public Button xPlayerButton;
     public Button oPlayerButton;
-    //public Button BackButton;
     public AudioSource winAudio;
     public AudioSource drawAudio;
     public GameObject GameMode;
@@ -37,6 +36,7 @@ public class GameController : MonoBehaviour
     const short PLAYER_VS_AI = 1;
     const short PLAYER_VS_PLAYER = 0;
     bool isGameStarts;
+    bool pauseTurn;
 
     void Awake()
     {
@@ -146,25 +146,44 @@ public class GameController : MonoBehaviour
             {
                 thisTurn = 0;
             }
-            else if ((((markedSpaces[1] == thisIcon) && (markedSpaces[4] == thisIcon)) ||
+            else if ((((markedSpaces[6] == thisIcon) && (markedSpaces[8] == thisIcon)) ||
+                      ((markedSpaces[1] == thisIcon) && (markedSpaces[4] == thisIcon)) ||
+                      ((markedSpaces[6] == enemyIcon) && (markedSpaces[8] == enemyIcon)) ||
                       ((markedSpaces[1] == enemyIcon) && (markedSpaces[4] == enemyIcon))) && (markedSpaces[7] == -100))
             {
                 thisTurn = 7;
             }
-            else if ((((markedSpaces[7] == thisIcon) && (markedSpaces[4] == thisIcon)) ||
+            else if ((((markedSpaces[0] == thisIcon) && (markedSpaces[2] == thisIcon)) ||
+                      ((markedSpaces[7] == thisIcon) && (markedSpaces[4] == thisIcon)) ||
+                      ((markedSpaces[0] == enemyIcon) && (markedSpaces[2] == enemyIcon)) ||
                       ((markedSpaces[7] == enemyIcon) && (markedSpaces[4] == enemyIcon))) && (markedSpaces[1] == -100))
             {
                 thisTurn = 1;
             }
-            else if ((((markedSpaces[5] == thisIcon) && (markedSpaces[4] == thisIcon)) ||
+            else if ((((markedSpaces[0] == thisIcon) && (markedSpaces[6] == thisIcon)) ||
+                      ((markedSpaces[5] == thisIcon) && (markedSpaces[4] == thisIcon)) ||
+                      ((markedSpaces[0] == enemyIcon) && (markedSpaces[6] == enemyIcon)) ||
                       ((markedSpaces[5] == enemyIcon) && (markedSpaces[4] == enemyIcon))) && (markedSpaces[3] == -100))
             {
                 thisTurn = 3;
             }
-            else if ((((markedSpaces[3] == thisIcon) && (markedSpaces[4] == thisIcon)) || 
+            else if ((((markedSpaces[2] == thisIcon) && (markedSpaces[8] == thisIcon)) || 
+                      ((markedSpaces[3] == thisIcon) && (markedSpaces[4] == thisIcon)) ||
+                      ((markedSpaces[2] == enemyIcon) && (markedSpaces[8] == enemyIcon)) ||
                       ((markedSpaces[3] == enemyIcon) && (markedSpaces[4] == enemyIcon))) && (markedSpaces[5] == -100))
             {
                 thisTurn = 5;
+            }
+            else if ((((markedSpaces[0] == thisIcon) && (markedSpaces[8] == thisIcon)) ||
+                      ((markedSpaces[6] == thisIcon) && (markedSpaces[2] == thisIcon)) ||
+                      ((markedSpaces[3] == thisIcon) && (markedSpaces[5] == thisIcon)) ||
+                      ((markedSpaces[1] == thisIcon) && (markedSpaces[7] == thisIcon)) ||
+                      ((markedSpaces[1] == enemyIcon) && (markedSpaces[7] == enemyIcon)) ||
+                      ((markedSpaces[3] == enemyIcon) && (markedSpaces[5] == enemyIcon)) ||
+                      ((markedSpaces[6] == enemyIcon) && (markedSpaces[2] == enemyIcon)) ||
+                      ((markedSpaces[0] == enemyIcon) && (markedSpaces[8] == enemyIcon))) && (markedSpaces[4] == -100))
+            {
+                thisTurn = 4;
             }
             else
             {
@@ -181,11 +200,24 @@ public class GameController : MonoBehaviour
         return thisTurn;
     }
 
+    public IEnumerator SetPouse()
+    {
+        pauseTurn = true;
+        yield return new WaitForSeconds(0.5f);
+        pauseTurn = false;
+    }
+
     void Update()
     {
-        if ((currMode != 0) && (isGameStarts) && (!isWinner) && (!isDraw))
+        if ((currMode != PLAYER_VS_PLAYER) && (isGameStarts) && (!isWinner) && (!isDraw))
         {
-            if (whoseTurn == computerTurn)
+            if ((currMode == AI_VS_AI) && !pauseTurn)
+            {
+                StartCoroutine("SetPouse");
+                int whichCell = choseAITurn();
+                TicTacToeButton(whichCell);
+            }
+            else if ((currMode == PLAYER_VS_AI) && (whoseTurn == computerTurn))
             {
                 int whichCell = choseAITurn();
                 TicTacToeButton(whichCell);
@@ -205,6 +237,7 @@ public class GameController : MonoBehaviour
             computerTurn = 0;
             computerTurn = 1;
         }
+        pauseTurn = false;
         isDraw = false;
         isGameStarts = true;
         isWinner = false;
@@ -269,7 +302,6 @@ public class GameController : MonoBehaviour
         oPlayerScoreText.text = "0";
     }
 
-    // 
     public void TicTacToeButton(int whichNumber)
     {
         xPlayerButton.interactable = false;
