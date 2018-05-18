@@ -187,13 +187,17 @@ public class GameController : MonoBehaviour
             }
             else
             {
-                int j = 0;
-                while (markedSpaces[j] != -100)
+                List<int> emptySpaces = new List<int>();
+                for (int j = 0; j < markedSpaces.Length; ++j)
                 {
-                    ++j;
+                    if (markedSpaces[j] == -100)
+                    {
+                        emptySpaces.Add(j);
+                    }
                 }
 
-                thisTurn = j;
+                int newx = Random.Range(0, emptySpaces.Count - 1);
+                thisTurn = emptySpaces[newx];
             }
         }
 
